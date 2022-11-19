@@ -5,14 +5,14 @@ SECRET_LENGTH = 16
 
 # Represents the TCP connection between a client and the server
 class ClientTCPSocket:
-    def __init__(self, server, reader, writer):
+    def __init__(self, server, reader: asyncio.StreamReader, writer):
         self.server = server
         self.reader = reader
         self.writer = writer
         self.secret = secrets.token_urlsafe(SECRET_LENGTH)[0:SECRET_LENGTH]
 
         asyncio.create_task(self.connection())
-    
+
     def matches(self, secret: str):
         return self.secret == secret
 
@@ -24,7 +24,9 @@ class ClientTCPSocket:
         await self.write(self.secret)
         asyncio.create_task(self.ping_loop())
 
-        await self.reader.read() # Since we are not receiving data afterwards, this blocks until the socket is closed
+        while True:
+            got_data = await self.reader.read() # Since we are not receiving data afterwards, this blocks until the socket is closed
+            print(f"Got data from client: {got_data}")
         await self.server.disconnect(self)
 
     async def ping_loop(self):

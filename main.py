@@ -9,7 +9,8 @@ TCP_LISTEN_PORT = 6600
 HTTP_LISTEN_PORT = 8080
 
 
-async def on_client_connection(reader, writer):
+async def on_client_connection(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+    print(f"New connection from client: {reader._transport.get_extra_info('peername')}")
     server = GameServer.instance()
     server.clients.append(ClientTCPSocket(server, reader, writer))
 
